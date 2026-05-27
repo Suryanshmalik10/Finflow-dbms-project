@@ -52,3 +52,29 @@ npm start
 Project report available in:
 
 docs/FinFlow_Project_Report.pdf
+
+## Screenshots
+
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Accounts
+
+![Accounts](screenshots/accounts.png)
+
+### Transactions
+
+![Transactions](screenshots/transactions.png)
+
+### Budgets
+
+![Budgets](screenshots/budgets.png)
+
+### Debts
+
+![Debts](screenshots/debts.png)
+
+### Analytics
+
+![Analytics](screenshots/analytics.png)
