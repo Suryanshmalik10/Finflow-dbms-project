@@ -78,3 +78,19 @@ docs/FinFlow_Project_Report.pdf
 ### Analytics
 
 ![Analytics](screenshots/analytics.png)
+
+## Database Design
+
+### Entity Relationship Diagram
+
+![ER Diagram](docs/er-diagram.png)
+
+### Key Entities
+
+- Users
+- Accounts
+- Transactions
+- Categories
+- Budgets
+- Goals
+- Debts
