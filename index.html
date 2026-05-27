@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinFlow — Personal Finance Dashboard</title>
+    <meta name="description" content="FinFlow: A comprehensive personal finance management system for tracking accounts, budgets, goals, and spending analytics.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Auth Page -->
+    <div class="auth-page active" id="authPage">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-logo">
+                    <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+                    <span class="logo-text">FinFlow</span>
+                </div>
+                <p class="auth-subtitle">Personal Finance Management System</p>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="tabLogin" onclick="showAuthTab('login')">Login</button>
+                    <button class="auth-tab" id="tabRegister" onclick="showAuthTab('register')">Register</button>
+                </div>
+                <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group"><label>Email</label><input type="email" id="loginEmail" required placeholder="you@email.com"></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="loginPassword" required placeholder="••••••••"></div>
+                    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Login</button>
+                    <div class="auth-error" id="loginError"></div>
+                </form>
+                <form class="auth-form" id="registerForm" style="display:none" onsubmit="handleRegister(event)">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="regName" required placeholder="Tanmay Agarwal"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="regEmail" required placeholder="you@email.com"></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="regPassword" required minlength="4" placeholder="Min 4 characters"></div>
+                    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Create Account</button>
+                    <div class="auth-error" id="regError"></div>
+                </form>
+                <p class="auth-footer">UCS310 DBMS Project — Suryansh Malik & Tanmay Agarwal</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+                <span class="logo-text">FinFlow</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+                <i class="fas fa-th-large"></i><span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-page="accounts" id="nav-accounts">
+                <i class="fas fa-wallet"></i><span>Accounts</span>
+            </a>
+            <a href="#" class="nav-item" data-page="transactions" id="nav-transactions">
+                <i class="fas fa-exchange-alt"></i><span>Transactions</span>
+            </a>
+            <a href="#" class="nav-item" data-page="budgets" id="nav-budgets">
+                <i class="fas fa-chart-pie"></i><span>Budgets</span>
+            </a>
+            <a href="#" class="nav-item" data-page="goals" id="nav-goals">
+                <i class="fas fa-bullseye"></i><span>Goals</span>
+            </a>
+            <a href="#" class="nav-item" data-page="debts" id="nav-debts">
+                <i class="fas fa-file-invoice-dollar"></i><span>Debts</span>
+            </a>
+            <a href="#" class="nav-item" data-page="recurring" id="nav-recurring">
+                <i class="fas fa-redo"></i><span>Recurring</span>
+            </a>
+            <a href="#" class="nav-item" data-page="analytics" id="nav-analytics">
+                <i class="fas fa-chart-line"></i><span>Analytics</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">User</span>
+                    <span class="user-role">Personal</span>
+                </div>
+                <button class="btn-icon" onclick="handleLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <div class="topbar-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search transactions, accounts..." id="globalSearch">
+            </div>
+            <div class="topbar-actions">
+                <div class="notif-wrapper">
+                    <button class="btn-icon" id="btnNotifications"><i class="fas fa-bell"></i><span class="badge" id="notifBadge">0</span></button>
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header"><h4>Notifications</h4><button class="btn-icon" onclick="clearNotifications()" title="Clear all"><i class="fas fa-check-double"></i></button></div>
+                        <div class="notif-list" id="notifList"><p class="text-muted" style="padding:1rem;text-align:center">No notifications</p></div>
+                    </div>
+                </div>
+                <button class="btn-primary-sm" id="btnAddTransaction"><i class="fas fa-plus"></i> New Transaction</button>
+            </div>
+        </header>
+
+        <!-- Dashboard Page -->
+        <section class="page active" id="page-dashboard">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p class="page-subtitle" id="welcomeMsg">Welcome! Here's your financial overview.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card stat-card--primary" id="statNetWorth">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Net Worth</span>
+                        <span class="stat-value">₹0</span>
+                        <span class="stat-change positive"><i class="fas fa-arrow-up"></i> 12.5%</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--success" id="statIncome">
+                    <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Monthly Income</span>
+                        <span class="stat-value">₹0</span>
+                        <span class="stat-change positive"><i class="fas fa-arrow-up"></i> 5.2%</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--danger" id="statExpenses">
+                    <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Monthly Expenses</span>
+                        <span class="stat-value">₹0</span>
+                        <span class="stat-change negative"><i class="fas fa-arrow-up"></i> 3.1%</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--warning" id="statSavings">
+                    <div class="stat-icon"><i class="fas fa-piggy-bank"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Savings Rate</span>
+                        <span class="stat-value">0%</span>
+                        <span class="stat-change positive"><i class="fas fa-arrow-up"></i> 2.0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card card-chart">
+                    <div class="card-header"><h3>Income vs Expenses</h3>
+                        <select id="chartPeriodSelect" class="select-sm"><option value="6">Last 6 Months</option><option value="12">Last 12 Months</option></select>
+                    </div>
+                    <div class="card-body"><canvas id="incomeExpenseChart"></canvas></div>
+                </div>
+                <div class="card card-chart">
+                    <div class="card-header"><h3>Spending by Category</h3></div>
+                    <div class="card-body"><canvas id="categoryChart"></canvas></div>
+                </div>
+                <div class="card card-wide">
+                    <div class="card-header"><h3>Recent Transactions</h3><a href="#" class="link" data-page="transactions">View All →</a></div>
+                    <div class="card-body" id="recentTransactions"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Budget Overview</h3></div>
+                    <div class="card-body" id="budgetOverviewDash"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Goals Progress</h3></div>
+                    <div class="card-body" id="goalsOverviewDash"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Accounts Page -->
+        <section class="page" id="page-accounts">
+            <div class="page-header">
+                <h1>Accounts</h1>
+                <button class="btn-primary" id="btnAddAccount"><i class="fas fa-plus"></i> Add Account</button>
+            </div>
+            <div class="accounts-grid" id="accountsGrid"></div>
+        </section>
+
+        <!-- Transactions Page -->
+        <section class="page" id="page-transactions">
+            <div class="page-header">
+                <h1>Transactions</h1>
+                <button class="btn-primary" id="btnAddTxn2"><i class="fas fa-plus"></i> New Transaction</button>
+            </div>
+            <div class="filters-bar">
+                <select id="filterAccount" class="select-filter"><option value="">All Accounts</option></select>
+                <select id="filterCategory" class="select-filter"><option value="">All Categories</option></select>
+                <select id="filterType" class="select-filter"><option value="">All Types</option><option value="Income">Income</option><option value="Expense">Expense</option><option value="Transfer">Transfer</option></select>
+                <input type="month" id="filterMonth" class="select-filter">
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="data-table" id="transactionsTable">
+                        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Account</th><th>Type</th><th>Amount</th><th>Actions</th></tr></thead>
+                        <tbody id="transactionsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Budgets Page -->
+        <section class="page" id="page-budgets">
+            <div class="page-header">
+                <h1>Budgets</h1>
+                <button class="btn-primary" id="btnAddBudget"><i class="fas fa-plus"></i> Set Budget</button>
+            </div>
+            <div class="budgets-grid" id="budgetsGrid"></div>
+            <div class="card card-chart" style="margin-top:1.5rem;">
+                <div class="card-header"><h3>Budget vs Actual Spending</h3></div>
+                <div class="card-body"><canvas id="budgetCompareChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- Goals Page -->
+        <section class="page" id="page-goals">
+            <div class="page-header">
+                <h1>Savings Goals</h1>
+                <button class="btn-primary" id="btnAddGoal"><i class="fas fa-plus"></i> New Goal</button>
+            </div>
+            <div class="goals-grid" id="goalsGrid"></div>
+        </section>
+
+        <!-- Debts Page -->
+        <section class="page" id="page-debts">
+            <div class="page-header">
+                <h1>Debts & Loans</h1>
+                <button class="btn-primary" id="btnAddDebt"><i class="fas fa-plus"></i> Add Debt</button>
+            </div>
+            <div class="debts-grid" id="debtsGrid"></div>
+            <div class="card" style="margin-top:1.5rem;">
+                <div class="card-header"><h3>EMI Calculator</h3></div>
+                <div class="card-body emi-calc">
+                    <div class="emi-inputs">
+                        <div class="form-group"><label>Principal (₹)</label><input type="number" id="emiPrincipal" value="500000"></div>
+                        <div class="form-group"><label>Annual Rate (%)</label><input type="number" id="emiRate" value="8.5" step="0.1"></div>
+                        <div class="form-group"><label>Tenure (Months)</label><input type="number" id="emiMonths" value="36"></div>
+                        <button class="btn-primary" id="btnCalcEMI">Calculate EMI</button>
+                    </div>
+                    <div class="emi-result" id="emiResult"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recurring Page -->
+        <section class="page" id="page-recurring">
+            <div class="page-header">
+                <h1>Recurring Payments</h1>
+                <button class="btn-primary" id="btnAddRecurring"><i class="fas fa-plus"></i> Add Recurring</button>
+            </div>
+            <div class="recurring-grid" id="recurringGrid"></div>
+        </section>
+
+        <!-- Analytics Page -->
+        <section class="page" id="page-analytics">
+            <div class="page-header"><h1>Analytics & Reports</h1></div>
+            <div class="analytics-grid">
+                <div class="card card-chart"><div class="card-header"><h3>Monthly Trend</h3></div><div class="card-body"><canvas id="trendChart"></canvas></div></div>
+                <div class="card card-chart"><div class="card-header"><h3>Expense Distribution</h3></div><div class="card-body"><canvas id="expenseDistChart"></canvas></div></div>
+                <div class="card card-chart"><div class="card-header"><h3>Daily Spending Pattern</h3></div><div class="card-body"><canvas id="dailyPatternChart"></canvas></div></div>
+                <div class="card card-chart"><div class="card-header"><h3>Savings Trend</h3></div><div class="card-body"><canvas id="savingsTrendChart"></canvas></div></div>
+                <div class="card card-chart card-wide"><div class="card-header"><h3>Net Worth Over Time</h3></div><div class="card-body"><canvas id="netWorthChart"></canvas></div></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Transaction</h3>
+                <button class="btn-icon" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script src="sql-files.js"></script>
+</body>
+</html>
